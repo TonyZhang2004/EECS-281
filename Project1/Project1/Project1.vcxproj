@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="getopt.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="maze.cpp" />
     <ClCompile Include="parse_cmd.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +37,7 @@
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="maze.h" />
     <ClInclude Include="parse_cmd.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
