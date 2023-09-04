@@ -1,3 +1,4 @@
+// Project Identifier : A8A3A33EF075ACEF9B08F5B9845569ECCB423725
 #include "maze.h"
 
 using namespace std;
@@ -19,6 +20,9 @@ maze::maze(Options opt) : has_start(false), has_target(false) {
 		exit(1);
 	}
 	this->puzzle.resize(this->height, vector<char>(this->width, '0'));
+	this->backtrace.resize(this->num_colors + 1,
+		vector<vector<char>>(this->height, vector<char>(this->width, '$'))); 
+
 
 	string str;
 	getline(cin, str);
@@ -29,11 +33,15 @@ maze::maze(Options opt) : has_start(false), has_target(false) {
 			row++;
 		}
 	}
+	if (!this->has_start || !this->has_target) {
+		cerr << "Error: Puzzle must have exactly one start and one target\n";
+		exit(1);
+	}
 }
 
 maze::~maze() {}
 
-void maze::input(int cur_row, string str) {
+void maze::input(uint32_t cur_row, string str) {
 	for (uint32_t i = 0; i < this->width; i++) {
 		check_ch(str[i]);
 		if (str[i] == '@') {
@@ -42,6 +50,8 @@ void maze::input(int cur_row, string str) {
 				exit(1);
 			}
 			this->has_start = true;
+			this->cur_state = State('0', 0, 0);
+			this->search_container.push_back(State('^', cur_row, i));
 		}
 		if (str[i] == '?') {
 			if (this->has_target) {
@@ -74,12 +84,115 @@ void maze::check_ch(char ch) {
 	}
 }
 
-void maze::display() {
+void maze::display_puzzle() {
 	for (uint32_t i = 0; i < this->height; i++) {
 		for (uint32_t j = 0; j < this->width; j++) {
 			cout << this->puzzle[i][j];
 		}
 		cout << '\n';
+	}
+}
+
+void maze::display_backtrace() {
+	for (uint32_t i = 0; i < this->num_colors + 1; i++) {
+		cout << "layer: " << i << "\n";
+		for (uint32_t j = 0; j < this->height; j++) {
+			for (uint32_t k = 0; k < this->width; k++) {
+				cout << this->backtrace[i][j][k];
+			}
+			cout << "\n";
+		}
+		cout << "\n";
+	}
+}
+
+bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_col) {
+	char cur_color = this->cur_state.get_color(); // '^', 'a', 'b', 'c', etc.
+	//assigning variables to be checked iff it's valid && not discovered
+	uint32_t layer;
+	if (cur_color == '^') {
+		layer = 0;
+	}
+	else {
+		layer = cur_color - 'a' + 1;
+	}
+	char north = '0', east = '0', south = '0', west = '0';
+	if (cur_row != 0 && backtrace[layer][cur_row - 1][cur_col] == '$')
+		north = this->puzzle[cur_row - 1][cur_col];
+	if (cur_col != this->width - 1 && backtrace[layer][cur_row][cur_col + 1] == '$')
+		east = this->puzzle[cur_row][cur_col + 1];
+	if (cur_row != this->height - 1 && backtrace[layer][cur_row + 1][cur_col] == '$')
+		south = this->puzzle[cur_row + 1][cur_col];
+	if (cur_col != 0 && backtrace[layer][cur_row][cur_col - 1] == '$')
+		west = this->puzzle[cur_row][cur_col - 1];
+	
+	if (cur_ch == '?') {  // successfully solved!
+		return true;
+	}
+
+	if ((cur_ch >= 'a' && uint32_t(cur_ch) <= 'a' + this->num_colors - 1) || cur_ch == '^') { // step on a button
+		char discover_flag;
+		if (cur_ch == '^') {
+			discover_flag = this->backtrace[0][cur_row][cur_col];
+		}
+		else {
+			discover_flag = this->backtrace[cur_ch - 'a' + 1][cur_row][cur_col];
+		}
+
+		if (discover_flag != '$') // already discovered
+			return false;
+		// undiscovered
+		discover_flag = cur_ch;
+		search_container.push_back(State(discover_flag, cur_row, cur_col));
+	}
+
+	if (cur_ch == '.' || cur_ch == '@' || (cur_ch >= 'A' && cur_ch <= 'Z')) { // feel free to discover & investigate
+		if (valid_to_discover(north, cur_color)) {
+			search_container.push_back(State(cur_color, cur_row - 1, cur_col));
+			backtrace[layer][cur_row - 1][cur_col] = 'S';
+		}
+		if (valid_to_discover(east, cur_color)) {
+			search_container.push_back(State(cur_color, cur_row, cur_col + 1));
+			backtrace[layer][cur_row][cur_col + 1] = 'W';
+		}
+		if (valid_to_discover(south, cur_color)) {
+			search_container.push_back(State(cur_color, cur_row + 1, cur_col));
+			backtrace[layer][cur_row + 1][cur_col] = 'N';
+		}
+		if (valid_to_discover(west, cur_color)) {
+			search_container.push_back(State(cur_color, cur_row, cur_col - 1));
+			backtrace[layer][cur_row][cur_col - 1] = 'E';
+		}
+	}
+	return false;
+}
+
+bool maze::valid_to_discover(char to_be_check, char cur_color) {
+	return (to_be_check != '0' && to_be_check != '#') || to_be_check == cur_color || to_be_check == '.'
+		|| to_be_check == '^' || (to_be_check >= 'a' && to_be_check <= 'z') || to_be_check == '?' || to_be_check == '@';
+}
+
+void maze::solve() {
+	if (this->option.ds_opt == DataStruct::kQueue) {
+		while (!this->search_container.empty()) {
+			// pop out the 1st element in the queue
+			this->cur_state = this->search_container.front();
+			this->search_container.pop_front();
+			uint32_t cur_row = cur_state.get_row();
+			uint32_t cur_col = cur_state.get_col();
+			char cur_ch = this->puzzle[cur_row][cur_col];
+
+			bool success = this->discover_and_investigate(cur_ch, cur_row, cur_col);
+			if (success) {
+				cout << "Successfully solved!\n";
+				return;
+			}
+		}
+		cout << "No solution!\n";
+	}
+
+	if (this->option.ds_opt == DataStruct::kStack) {
+
 	}
 }
 

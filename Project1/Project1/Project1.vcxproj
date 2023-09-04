@@ -23,6 +23,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maze.cpp" />
     <ClCompile Include="parse_cmd.cpp" />
+    <ClCompile Include="state.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="big.txt" />
@@ -39,6 +40,7 @@
   <ItemGroup>
     <ClInclude Include="maze.h" />
     <ClInclude Include="parse_cmd.h" />
+    <ClInclude Include="state.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
