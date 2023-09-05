@@ -1,3 +1,4 @@
+// Project Identifier: A8A3A33EF075ACEF9B08F5B9845569ECCB423725
 // https://github.com/dgarriga/ngscmd/tree/master/src
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)

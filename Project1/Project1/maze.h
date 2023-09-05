@@ -22,13 +22,13 @@ public:
 	void input(uint32_t cur_row, string str);
 	bool discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_col);
 	bool valid_to_discover(char to_be_check, char cur_color);
+	void output();
 private:
 	uint32_t num_colors;
 	uint32_t height;
 	uint32_t width;
 	State cur_state;
 	vector<vector<char>> puzzle;
-
 	/*remember to - 'a' + 1 if accessing the 1st dim of backtrace!
 	'$' means undiscovered!
 	'%' means discovered!
@@ -37,6 +37,7 @@ private:
 	Options option;
 	bool has_start;
 	bool has_target;
+	bool has_solution;
 	deque<State> search_container;
 };
 
