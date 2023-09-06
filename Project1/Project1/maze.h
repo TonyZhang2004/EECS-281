@@ -23,6 +23,9 @@ public:
 	bool discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_col);
 	bool valid_to_discover(char to_be_check, char cur_color);
 	void output();
+	State get_cur_state();
+	void navigate_route();
+	void display_list();
 private:
 	uint32_t num_colors;
 	uint32_t height;
@@ -39,6 +42,8 @@ private:
 	bool has_target;
 	bool has_solution;
 	deque<State> search_container;
+	vector<State> route;
+	vector<vector<vector<char>>> map;
 };
 
 #endif // !MAZE_H
