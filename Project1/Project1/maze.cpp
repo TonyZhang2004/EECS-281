@@ -73,13 +73,13 @@ void maze::check_ch(char ch) {
 		exit(1);
 	}
 	if (ch >= 'a' && ch <= 'z') {
-		if (ch > char('a' + this->num_colors)) {
+		if (ch > static_cast<char>('a' + this->num_colors)) {
 			cerr << "Error: Invalid button in map\n";
 			exit(1);
 		}
 	}
 	if (ch >= 'A' && ch <= 'Z') {
-		if (ch > char('A' + this->num_colors)) {
+		if (ch > static_cast<char>('A' + this->num_colors)) {
 			cerr << "Error: Invalid door in map\n";
 			exit(1);
 		}
@@ -138,7 +138,7 @@ bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_
 		return true;
 	}
 
-	if ((cur_ch >= 'a' && uint32_t(cur_ch) <= 'a' + this->num_colors - 1) || cur_ch == '^') { // step on a button
+	if ((cur_ch >= 'a' && static_cast<uint32_t>(cur_ch) <= 'a' + this->num_colors - 1) || cur_ch == '^') { // step on a button
 		uint32_t id;
 		if (cur_ch == '^') {
 			id = 0;
@@ -146,9 +146,7 @@ bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_
 		else {
 			id = cur_ch - 'a' + 1;
 		}
-
-		if (this->backtrace[id][cur_row][cur_col] != '$') // discovered or not
-		{
+		if (cur_ch == this->cur_state.get_color()) { // standing on a button, but it's the start of this layer.
 			if (valid_to_discover(north, cur_color)) {
 				search_container.push_back(State(cur_color, cur_row - 1, cur_col));
 				backtrace[layer][cur_row - 1][cur_col] = 'S';
@@ -165,11 +163,13 @@ bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_
 				search_container.push_back(State(cur_color, cur_row, cur_col - 1));
 				backtrace[layer][cur_row][cur_col - 1] = 'E';
 			}
-			return false;
 		}
-		// undiscovered
-		backtrace[id][cur_row][cur_col] = cur_color;
-		search_container.push_back(State(cur_ch, cur_row, cur_col));
+		
+		else if (this->backtrace[id][cur_row][cur_col] == '$') // discovered or not
+		{
+			backtrace[id][cur_row][cur_col] = cur_color;
+			search_container.push_back(State(cur_ch, cur_row, cur_col));
+		}
 	}
 
 	if (cur_ch == '.' || cur_ch == '@' || (cur_ch >= 'A' && cur_ch <= 'Z')) { // feel free to discover & investigate
@@ -195,7 +195,7 @@ bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_
 
 bool maze::valid_to_discover(char to_be_check, char cur_color) {
 	return (to_be_check != '0' && to_be_check != '#') && (to_be_check == cur_color - 'a' + 'A' || to_be_check == '.'
-		|| to_be_check == '^' || (to_be_check >= 'a' && to_be_check <= 'z') || to_be_check == '?' || to_be_check == '@');
+		|| (to_be_check == '^') || (to_be_check >= 'a' && to_be_check <= 'z') || to_be_check == '?' || to_be_check == '@');
 }
 
 void maze::solve() {
@@ -218,7 +218,7 @@ void maze::solve() {
 
 	if (this->option.ds_opt == DataStruct::kStack) {
 		while (!this->search_container.empty()) {
-			// pop out the 1st element in the queue
+			// pop out the last element in the stack
 			this->cur_state = this->search_container.back();
 			this->search_container.pop_back();
 			uint32_t cur_row = cur_state.get_row();
@@ -241,15 +241,21 @@ State maze::get_cur_state() {
 void maze::navigate_route() {
 	uint32_t cur_row = cur_state.get_row();
 	uint32_t cur_col = cur_state.get_col();
-	while (puzzle[cur_row][cur_col] != '@') {
+	uint32_t layer = 0;
+	char cur_color = cur_state.get_color();
+	if (cur_color == '^')
+		layer = 0;
+	if (cur_color >= 'a' && cur_color <= 'z')
+		layer = cur_color - 'a' + 1;
+	while (puzzle[cur_row][cur_col] != '@' || layer != 0) {
 		cur_row = cur_state.get_row();
 		cur_col = cur_state.get_col();
-		uint32_t layer = 0;
-		char cur_color = cur_state.get_color();
+		cur_color = cur_state.get_color();
 		if (cur_color == '^')
 			layer = 0;
 		if (cur_color >= 'a' && cur_color <= 'z')
 			layer = cur_color - 'a' + 1;
+
 		this->route.push_back(cur_state);
 		char token = backtrace[layer][cur_row][cur_col];
 		if (token == 'E')
@@ -282,20 +288,20 @@ void maze::output() {
 	if (this->option.out_opt == OutMode::kMap && this->has_solution == true) {
 		this->map.resize(this->num_colors + 1, this->puzzle);
 
-		while (!(this->route.size() == 1)) {
+		while (!(this->route.size() == 0)) {
 			char cur_color = this->route.back().get_color();
 			int layer;
 			if (cur_color == '^')
 				layer = 0;
 			else
 				layer = cur_color - 'a' + 1;
-			char cur_row = this->route.back().get_row();
-			char cur_col = this->route.back().get_col();
+			uint32_t cur_row = this->route.back().get_row();
+			uint32_t cur_col = this->route.back().get_col();
 			this->route.pop_back();
 			if (puzzle[cur_row][cur_col] == '?')
 				continue;
 			if ((puzzle[cur_row][cur_col] >= 'a' && puzzle[cur_row][cur_col] <= 'z')
-				|| puzzle[cur_row][cur_col] == '^') {
+				|| (puzzle[cur_row][cur_col] == '^' && layer != 0 && this->route.size() != 0)) { // '^' case : not the start, could appear in the 1st level
 				if (puzzle[cur_row][cur_col] == cur_color)
 					this->map[layer][cur_row][cur_col] = '@';
 				else
@@ -308,15 +314,21 @@ void maze::output() {
 
 		}
 
+		map[0][cur_state.get_row()][cur_state.get_col()] = '@';
+
 		for (uint32_t i = 0; i < this->num_colors + 1; i++) {
 			char color;
 			if (i == 0)
 				color = '^';
 			else
-				color = 'a' + i - 1;
+				color = static_cast<char>('a' + i - 1);
 			cout << "// color " << color << "\n";
 			for (uint32_t j = 0; j < this->height; j++) {
 				for (uint32_t k = 0; k < this->width; k++) {
+					if (map[i][j][k] == '+') {
+						cout << map[i][j][k];
+						continue;
+					}
 					if (map[i][j][k] == color && i == 0)
 						map[i][j][k] = '.';
 					if (i != 0 && (map[i][j][k] == color || map[i][j][k] == color - 'a' + 'A'))
@@ -334,6 +346,19 @@ void maze::output() {
 
 	if (this->has_solution == false) {
 		cout << "No solution.\nDiscovered:\n";
+		for (uint32_t i = 0; i < this->height; i++) {
+			for (uint32_t j = 0; j < this->width; j++) {
+				bool visited = false;
+				for (uint32_t layer = 0; layer < this->num_colors + 1; layer++) {
+					if (backtrace[layer][i][j] != '$')
+						visited = true;
+				}
+
+				if (!visited)
+					this->puzzle[i][j] = '#';
+			}
+		}
+		display_puzzle();
 	}
 }
 

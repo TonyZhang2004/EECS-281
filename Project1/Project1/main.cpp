@@ -2,7 +2,6 @@
 // This is Project 1 puzzle solver in UMich EECS 281.
 // This implementation is owned by Guanyu Zhang.
 #include <iostream>
-#include <iomanip>
 
 #include "parse_cmd.h"
 #include "maze.h"
