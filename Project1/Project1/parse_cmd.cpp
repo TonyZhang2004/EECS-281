@@ -32,16 +32,21 @@ void getMode(int argc, char* argv[], Options& options) {
                     exit(1);
                 }
 
-                if (options.out_opt != OutMode::kNone) {
-                    cerr << "Both map and list output modes specified" << endl;
-                }
-
                 if (arg == "map") {
                     options.out_opt = OutMode::kMap;
                 }
                 else {
                     options.out_opt = OutMode::kList;
                 }
+
+                for (; optind < argc && *argv[optind] != '-'; optind++) {
+                    string str = string(argv[optind]);
+                    if (options.out_opt != OutMode::kNone && (str == "map" || str == "list")) {
+                        cerr << "Error : exactly one of map and list can be specified\n";
+                        exit(1);
+                    }
+                }
+
                 break;
             }
 

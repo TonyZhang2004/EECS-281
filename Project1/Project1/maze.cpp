@@ -288,30 +288,52 @@ void maze::output() {
 	if (this->option.out_opt == OutMode::kMap && this->has_solution == true) {
 		this->map.resize(this->num_colors + 1, this->puzzle);
 
-		while (!(this->route.size() == 0)) {
+		bool transport = false;
+		int layer = 0;
+		while (!(this->route.size() == 1)) {
 			char cur_color = this->route.back().get_color();
-			int layer;
+			int cur_layer;
 			if (cur_color == '^')
-				layer = 0;
+				cur_layer = 0;
 			else
-				layer = cur_color - 'a' + 1;
+				cur_layer = cur_color - 'a' + 1;
+			if (cur_layer != layer)
+				transport = true;
+			else
+				transport = false;
+			
+
 			uint32_t cur_row = this->route.back().get_row();
 			uint32_t cur_col = this->route.back().get_col();
 			this->route.pop_back();
+
+			char next_color = route.back().get_color();
+			int next_layer;
+			if (next_color == '^')
+				next_layer = 0;
+			else
+				next_layer = next_color - 'a' + 1;
+
+
 			if (puzzle[cur_row][cur_col] == '?')
 				continue;
 			if ((puzzle[cur_row][cur_col] >= 'a' && puzzle[cur_row][cur_col] <= 'z')
-				|| (puzzle[cur_row][cur_col] == '^' && layer != 0 && this->route.size() != 0)) { // '^' case : not the start, could appear in the 1st level
-				if (puzzle[cur_row][cur_col] == cur_color)
-					this->map[layer][cur_row][cur_col] = '@';
+				|| (puzzle[cur_row][cur_col] == '^')) { // '^' case : not the start, could appear in the 1st level
+				if (transport) {
+					map[cur_layer][cur_row][cur_col] = '@';
+				}
+				else if (cur_layer != next_layer) {
+					map[cur_layer][cur_row][cur_col] = '%';
+				}
 				else
-					this->map[layer][cur_row][cur_col] = '%';
+					map[cur_layer][cur_row][cur_col] = '+';
 			}
 
 			else {
-				map[layer][cur_row][cur_col] = '+';
+				map[cur_layer][cur_row][cur_col] = '+';
 			}
 
+			layer = cur_layer;
 		}
 
 		map[0][cur_state.get_row()][cur_state.get_col()] = '@';
