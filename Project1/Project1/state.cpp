@@ -2,10 +2,6 @@
 
 #include "state.h"
 
-void State::print() {
-	cout << "(" << this->color << ", (" << this->row << ", " << this - col << "))\n";
-}
-
 uint32_t State::get_col() {
 	return this->col;
 }

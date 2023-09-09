@@ -16,20 +16,20 @@ public:
 	maze(Options opt);
 	~maze();
 	void display_puzzle();
-	void display_backtrace();
 	void solve();
 	void check_ch(char ch);
-	void input(uint32_t cur_row, string str);
+	void input(uint32_t cur_row, const string& str);
 	bool discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_col);
-	bool valid_to_discover(char to_be_check, char cur_color);
+	bool valid_to_discover(char to_be_check, char cur_color, bool& solved);
 	void output();
-	State get_cur_state();
 	void navigate_route();
 	void display_list();
 private:
 	uint32_t num_colors;
 	uint32_t height;
 	uint32_t width;
+	uint32_t target_row = 0;
+	uint32_t target_col = 0;
 	State cur_state;
 	vector<vector<char>> puzzle;
 	/*remember to - 'a' + 1 if accessing the 1st dim of backtrace!
