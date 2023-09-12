@@ -3,12 +3,14 @@
 
 using namespace std;
 
-maze::maze(Options opt) : has_start(false), has_target(false) {
-	this->option = opt;
+maze::maze(Options opt) : option(opt), has_start(false), has_target(false) {
 	this->has_solution = false;
 
-	if (!(cin >> this->num_colors >> this->height >> this->width))
+	if (!(cin >> this->num_colors >> this->height >> this->width)) {
+		cerr << "Error: Invalid numColor\n";
 		exit(1);
+	}
+		
 	if (this->num_colors > 26) {
 		cerr << "Error: Invalid numColor\n";
 		exit(1);
@@ -79,13 +81,13 @@ void maze::check_ch(char ch) {
 		exit(1);
 	}
 	if (ch >= 'a' && ch <= 'z') {
-		if (ch > static_cast<char>('a' + this->num_colors)) {
+		if (ch > static_cast<char>('a' + this->num_colors - 1)) {
 			cerr << "Error: Invalid button in map\n";
 			exit(1);
 		}
 	}
 	if (ch >= 'A' && ch <= 'Z') {
-		if (ch > static_cast<char>('A' + this->num_colors)) {
+		if (ch > static_cast<char>('A' + this->num_colors - 1)) {
 			cerr << "Error: Invalid door in map\n";
 			exit(1);
 		}
@@ -100,7 +102,6 @@ void maze::display_puzzle() {
 		cout << '\n';
 	}
 }
-
 
 bool maze::discover_and_investigate(char cur_ch, uint32_t cur_row, uint32_t cur_col) {
 	char cur_color = this->cur_state.get_color(); // '^', 'a', 'b', 'c', etc.
@@ -225,7 +226,6 @@ void maze::solve() {
 		}
 	}
 }
-
 
 void maze::navigate_route() {
 	uint32_t cur_row = cur_state.get_row();

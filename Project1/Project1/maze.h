@@ -13,7 +13,7 @@
 
 class maze {
 public:
-	maze(Options opt);
+	explicit maze(Options opt);
 	~maze();
 	void display_puzzle();
 	void solve();

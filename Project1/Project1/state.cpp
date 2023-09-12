@@ -3,13 +3,13 @@
 #include "state.h"
 
 uint32_t State::get_col() {
-	return this->col;
+	return col;
 }
 
 uint32_t State::get_row() {
-	return this->row;
+	return row;
 }
 
 char State::get_color() {
-	return this->color;
+	return color;
 }
