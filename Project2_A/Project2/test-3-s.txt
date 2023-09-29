@@ -1,0 +1,16 @@
+# test-3
+quiver-capacity: 1
+random-seed: 1234
+max-rand-distance: 1
+max-rand-speed: 600
+max-rand-health: 30
+---
+round: 1
+random-zombies: 1
+named-zombies: 1
+Tommy distance: 1 speed: 1 health: 100
+---
+round: 3
+random-zombies: 1
+named-zombies: 1
+JamesDuderstadt distance: 20 speed: 10 health: 20
