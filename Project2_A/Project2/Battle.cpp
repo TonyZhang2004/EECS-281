@@ -33,7 +33,6 @@ void Battle::set_param() {
 	P2random::initialize(random_seed, max_rand_distance, max_rand_speed, max_rand_health);
 }
 
-
 void Battle::push_med_heap(Zombie* zb) {
 	if (this->max_med_heap.empty() && this->min_med_heap.empty()) {
 		min_med_heap.push(zb);
@@ -244,9 +243,7 @@ void Battle::init() {
 		for (Zombie* zb : this->master_list) {
 			this->push_stats_heap(zb);
 		}
-	}
-
-	if (this->option.statistics)
 		this->print_stats();
+	}		
 }
 

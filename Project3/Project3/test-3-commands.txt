@@ -1,0 +1,29 @@
+#This is the sample commands file, showing the format of each command.
+#You can put comments here in the operations section.
+login mertg 080400 231.43.171.61
+place 08:02:01:40:22:34 134.31.78.43 mertg paoletti 2000 09:02:01:40:22:34 s
+login mertg 080499 231.43.171.61
+login mertg 000000 231.43.171.63
+login Tony 000000 231.43.171.61
+place 08:03:01:40:22:34 134.31.78.43 mertg Albert 2000 08:03:01:40:22:35 s
+place 08:03:01:40:22:35 134.31.78.43 mertg mmdarden 2000 08:03:02:40:22:34 s
+place 08:03:01:40:22:36 231.43.171.63 mertg mertg 200000 08:03:02:40:22:36 s
+place 08:05:04:40:22:36 231.43.171.61 mertg mertg 2000 08:05:04:42:22:36 s
+place 08:06:04:40:22:36 231.43.171.63 mertg mertg 12 08:06:04:41:22:36 s
+place 08:06:04:40:22:37 231.43.171.61 mertg mertg 123 08:08:05:40:44:34 s
+place 08:07:04:40:22:37 231.43.171.61 mertg mertg 1 08:08:05:40:44:34 s
+place 08:08:04:40:22:37 231.43.171.61 mertg mertg 2 08:08:05:40:44:34 s
+place 08:09:04:40:22:37 231.43.171.61 Tony paoletti 500 08:09:04:40:22:38 s
+place 08:10:04:40:22:37 231.43.171.61 Tony paoletti 1 08:10:04:40:22:38 s
+out Tony 231.43.171.61
+login Tony 231.43.171.63
+place 08:11:04:40:22:37 231.43.171.61 Tony paoletti 1 08:11:04:40:22:38 s
+place 08:12:04:40:22:37 231.43.171.63 Tony paoletti 1 08:12:04:40:22:38 s
+$$$
+l 08:03:01:40:22:36 10:03:01:40:22:34       
+r 08:03:01:40:22:36 08:23:07:11:62:34   
+h mertg
+h Tony
+s 08:03:02:30:22:36
+s 09:02:01:40:22:34
+h Albert
