@@ -115,13 +115,17 @@ void Zoo::solve_FASTTSP() {
 	}
 }
 
-void Zoo::precalc_MST(size_t num_unvisited, size_t permLength) {
-	
+
+bool Zoo::promising(size_t permLength) {
+	size_t num_unvisited = opt_working_path.size() - permLength;
+	if (num_unvisited < 5) {
+		return true;
+	}
 	// calculate the MST constructed by the remaining vertices
-	visited.clear();
-	visited.resize(num_unvisited, false);
-	squared_dist_list.clear();
+	vector<bool> visited(num_unvisited, false);
+	vector<double> squared_dist_list;
 	squared_dist_list.resize(num_unvisited);
+	vector<int> parents(num_unvisited, -1);
 	squared_dist_list[0] = 0;
 	for (uint32_t i = 1; i < squared_dist_list.size(); i++) {
 		squared_dist_list[i] = numeric_limits<double>::infinity();
@@ -154,15 +158,6 @@ void Zoo::precalc_MST(size_t num_unvisited, size_t permLength) {
 			}
 		}
 	}
-	
-}
-
-bool Zoo::promising(size_t permLength) {
-	size_t num_unvisited = opt_working_path.size() - permLength;
-	if (num_unvisited < 5) {
-		return true;
-	}
-	precalc_MST(num_unvisited, permLength);
 
 	// output
 	double MST_weight = 0;
@@ -172,16 +167,20 @@ bool Zoo::promising(size_t permLength) {
 	// end of MST, start to calc arms weight
 	Point pt_a = master_list[0];
 	double weight_a = numeric_limits<double>::infinity();
+	for (size_t i = permLength; i < opt_working_path.size(); i++) {
+		double temp = calc_dist(pt_a, master_list[opt_working_path[i]]);
+		if (temp < weight_a) {
+			weight_a = temp;
+		}
+	}
 	Point pt_b = master_list[opt_working_path[permLength - 1]];
 	double weight_b = numeric_limits<double>::infinity();
 	for (size_t i = permLength; i < opt_working_path.size(); i++) {
-		double temp1 = calc_dist(pt_a, master_list[opt_working_path[i]]);
-		double temp2 = calc_dist(pt_b, master_list[opt_working_path[i]]);
-		if (temp1 < weight_a) {
-			weight_a = temp1;
-		}
-		if (temp2 < weight_b) {
-			weight_b = temp2;
+
+		double temp = calc_dist(pt_b, master_list[opt_working_path[i]]);
+
+		if (temp < weight_b) {
+			weight_b = temp;
 		}
 	}
 	double arms_weight = weight_a + weight_b;
@@ -193,10 +192,7 @@ bool Zoo::promising(size_t permLength) {
 	cerr << setw(10) << weight_a << setw(10) << weight_b;
 	cerr << setw(10) << MST_weight << setw(10) << arms_weight + opt_cur_cost + MST_weight << "  " << promise << '\n';*/
 
-	if (promise) {
-		return true;
-	}
-	return false;
+	return promise;
 }
 
 void Zoo::genPerms(size_t permLength) {
@@ -234,8 +230,16 @@ void Zoo::solve_OPTTSP() {
 	this->opt_best_path = fast_path;
 	opt_best_path.pop_back();
 	this->opt_best_cost = fast_cost;
-	this->opt_working_path = fast_path;
-	this->opt_working_path.pop_back();
+	if (this->size < 15) { // modify the threshold
+		this->opt_working_path.resize(opt_best_path.size());
+		for (uint32_t i = 0; i < (unsigned long long)opt_working_path.size(); i++) {
+			opt_working_path[i] = i;
+		}
+	}
+	else {
+		this->opt_working_path = fast_path;
+		this->opt_working_path.pop_back();
+	}
 	size_t perm_length = 1;
 	genPerms(perm_length);
 	cout << opt_best_cost << "\n";

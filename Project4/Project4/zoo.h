@@ -27,16 +27,15 @@ public:
 		return !((pt_a.get_type() == Wild && pt_b.get_type() == Safe)
 			|| (pt_a.get_type() == Safe && pt_b.get_type() == Wild));
 	};
-	double calc_squared_dist(Point pt_a, Point pt_b) {
+	inline double calc_squared_dist(Point& pt_a, Point& pt_b) {
 		return (pt_a.get_x() - pt_b.get_x()) * (pt_a.get_x() - pt_b.get_x())
 			+ (pt_a.get_y() - pt_b.get_y()) * (pt_a.get_y() - pt_b.get_y());
 	}
-	double calc_dist(Point pt_a, Point pt_b) {
+	inline double calc_dist(Point& pt_a, Point& pt_b) {
 		return sqrt(calc_squared_dist(pt_a, pt_b));
 	}
 	void genPerms(size_t permLength);
 	bool promising(size_t permLength);
-	void precalc_MST(size_t num_unvisited, size_t permLength); // for OPTTSP
 private:
 	vector<Point> master_list;
 	vector<double> squared_dist_list;
